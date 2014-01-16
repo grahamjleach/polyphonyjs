@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Polyphony.js</title>
+</head>
+<body>
+
+
+
+
+<script src="src/polyphony.js"></script>
+<script>
+
+    /* ---------- SAMPLE ---------- */
+
+    polyphony(function(components){
+
+        'use strict';
+
+        /* ---------- MODEL ---------- */
+
+        var mySynth = new components.Synth(function(modules){
+
+            var myEnv = new modules.ADSR(),
+                    myEnvKey,
+                    myOsc = new modules.Oscillator();
+
+            myEnv.connect(myOsc.gain);
+            myOsc.connect(this.output);
+
+            this.on('notedown', function(note){
+
+                myOsc.note = note;
+                myEnvKey = myEnv.down();
+                console.log('s:notedown', myEnvKey);
+            });
+
+            this.on('noteup', function(note){
+                console.log('s:noteup', myEnvKey);
+                myEnvKey.up();
+            });
+
+        });
+
+        mySynth.connect(components.out);
+
+        //var myBank = new components.Bank(mySynth, 4);
+
+        /* ---------- CONTROL ---------- */
+
+        (function(){
+
+            var key = null,
+                    note;
+
+            function keyDown(event){
+
+                if(key !== event.keyCode){
+                    key = event.keyCode;
+                    note = mySynth.down(event.keyCode);
+                }
+
+            }
+
+            function keyUp(event){
+
+                if(key === event.keyCode){
+                    key = null;
+                    note.up();
+                }
+
+            }
+
+            document.body.addEventListener('keydown', keyDown);
+            document.body.addEventListener('keyup', keyUp);
+
+        })();
+
+    });
+</script>
+</body>
+</html>

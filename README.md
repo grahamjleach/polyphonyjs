@@ -1,2 +1,4 @@
-jeeves-syn
-==========
+
+# polyphonyjs
+
+> Modular Synth via AudioContext
