@@ -22,11 +22,14 @@
         var mySynth = new components.Synth(function(modules){
 
             var myEnv = new modules.ADSR(),
-                    myEnvKey,
-                    myOsc = new modules.Oscillator();
+                myEnvKey,
+                myOsc = new modules.Oscillator(),
+                myDelay = new modules.Delay();
 
+            myDelay.feedback = 0.8;
             myEnv.connect(myOsc.gain);
-            myOsc.connect(this.output);
+            myOsc.connect(myDelay.input);
+            myDelay.connect(this.output);
 
             this.on('notedown', function(note){
 

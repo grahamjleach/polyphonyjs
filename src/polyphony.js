@@ -75,9 +75,6 @@ var polyphony = (function(){
     }
     Note.inherit(Subscriber);
 
-
-
-
     var modules = {
 
         Oscillator : function(){
@@ -122,7 +119,7 @@ var polyphony = (function(){
 
             Object.defineProperty(this, 'note', {
                 get: function(){
-                    return noteToFrequency(oscillator.frequency.value);
+                    return frequencyToNote(oscillator.frequency.value);
                 },
                 set: function(value){
                     oscillator.frequency.value = noteToFrequency(value);
@@ -181,8 +178,62 @@ var polyphony = (function(){
                 }
             });
 
+            Object.defineProperty(this, 'input', {
+                get: function(){
+                    return filter;
+                }
+            });
+
             this.connect = function(out){
                 filter.connect(out);
+            }
+
+        },
+
+        Delay : function(){
+
+            var delay = context.createDelayNode(),
+                inputBuffer = context.createGainNode(),
+                feedbackLevel = context.createGainNode(),
+                outputBuffer = context.createGainNode();
+
+            delay.delayTime.value = 0.5;
+            inputBuffer.gain.value = 1;
+            feedbackLevel.gain.value = 0;
+            outputBuffer.gain.value = 1;
+
+            inputBuffer.connect(outputBuffer);
+            inputBuffer.connect(delay);
+            delay.connect(feedbackLevel);
+            delay.connect(outputBuffer);
+            feedbackLevel.connect(delay);
+
+            Object.defineProperty(this, 'delayTime', {
+                get: function(){
+                    return delay.delayTime.value;
+                },
+                set: function(value){
+                    delay.delayTime.value = value;
+                }
+            });
+
+            Object.defineProperty(this, 'feedback', {
+                get: function(){
+                    return feedbackLevel.gain.value;
+                },
+                set: function(value){
+                    feedbackLevel.gain = value;
+                }
+            });
+
+            Object.defineProperty(this, 'input', {
+                get: function(){
+                    return inputBuffer;
+                }
+            });
+
+            this.connect = function(out){
+                outputBuffer.connect(out);
             }
 
         },
@@ -235,12 +286,6 @@ var polyphony = (function(){
 
             this.speed = 0;
 
-            this.connect = function(param){
-
-                out = param;
-
-            }
-
             function set(note){
 
                 var now = context.currentTime;
@@ -267,6 +312,12 @@ var polyphony = (function(){
                     filter.frequency.value = value;
                 }
             });
+
+            this.connect = function(param){
+
+                out = param;
+
+            }
 
         }
 
@@ -309,10 +360,7 @@ var polyphony = (function(){
     }
     Synth.inherit(Subscriber);
 
-
-
-
-    function Polyphony(synth, voices){
+    function Bank(synth, voices){
 
         var gain = context.createGainNode(),
             bank = [],
@@ -329,7 +377,6 @@ var polyphony = (function(){
 
         this.down = function(note){
 
-            //console.log('bank down', note);
             var out = null; // find empty or oldest
 
             for(var i = 0; i < voices; i++){
@@ -360,7 +407,7 @@ var polyphony = (function(){
     /* -------------------------------------------------- */
 
     var containers = {
-        Bank        : Polyphony,
+        Bank        : Bank,
         Synth       : Synth,
         out         : context.destination
     }
