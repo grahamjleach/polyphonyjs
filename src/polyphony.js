@@ -68,7 +68,7 @@ var polyphony = (function(){
 
         this.up = function(){
             this.fire('up');
-        }
+        };
 
         this.on('up', onEnd);
 
@@ -137,7 +137,7 @@ var polyphony = (function(){
 
             this.connect = function(out){
                 gain.connect(out);
-            }
+            };
 
         },
 
@@ -186,7 +186,7 @@ var polyphony = (function(){
 
             this.connect = function(out){
                 filter.connect(out);
-            }
+            };
 
         },
 
@@ -234,7 +234,48 @@ var polyphony = (function(){
 
             this.connect = function(out){
                 outputBuffer.connect(out);
-            }
+            };
+
+        },
+
+        Sample : function(){
+
+            var buffer = null,
+                bufferSource = null,
+                mediaElement = null,
+                mediaElementSource = null,
+                level = context.createGainNode();
+
+            level.gain.value = 1;
+
+            this.root = 67; //C4
+
+            this.load = function(arrayBuffer){
+                try{
+                    buffer = context.createBuffer(arrayBuffer, false);
+                }
+                catch(exception){
+                    console.error('unable to load audio: '+exception.message);
+                    buffer = null;
+                }
+            };
+
+            this.down = function(note){
+
+                if(buffer){
+                    if(bufferSource){ bufferSource.noteOff(0); }
+                    bufferSource = context.createBufferSource();
+                    bufferSource.connect(level);
+                    bufferSource.buffer = buffer;
+                    bufferSource.playbackRate.value = noteToFrequency(note) / noteToFrequency(this.root);
+                    bufferSource.noteOn(0);
+                }
+
+            };
+
+            this.connect = function(out){
+                level.connect(out);
+            };
 
         },
 
@@ -247,13 +288,6 @@ var polyphony = (function(){
             this.d = 30;
             this.s = 0.2;
             this.r = 0.5;
-
-            this.connect = function(param){
-
-                out = param;
-                out.value = 0;
-
-            }
 
             var up = function(){
 
@@ -275,6 +309,13 @@ var polyphony = (function(){
                 out.linearRampToValueAtTime(this.level, now + this.a);
                 out.setTargetAtTime(this.s * this.level, now + this.a, this.d);
                 return new Note(up);
+
+            }
+
+            this.connect = function(param){
+
+                out = param;
+                out.value = 0;
 
             }
 
