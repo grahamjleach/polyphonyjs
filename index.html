@@ -19,7 +19,7 @@
 
         /* ---------- MODEL ---------- */
 
-        var mySynth = new components.Synth(function(modules){
+        var mySynth = new components.Voice(function(modules){
 
             var myEnv = new modules.ADSR(),
                 myEnvKey,
@@ -47,9 +47,12 @@
 
         mySynth.connect(components.out);
 
-        //var myBank = new components.Bank(mySynth, 4);
+        /*
+        OR: var myBank = new components.Bank(mySynth, 4);
+        myBank.connect(components.out);
+        */
 
-        /* ---------- CONTROL ---------- */
+        /* ---------- UI CONTROL ---------- */
 
         (function(){
 

@@ -366,14 +366,14 @@ var polyphony = (function(){
 
     /* -------------------------------------------------- */
 
-    function Synth(build){
+    function Voice(build){
 
         this.output = context.createGainNode();
         this.output.gain.value = 1;
 
         this.clone = function(){
 
-            return new Synth(build);
+            return new Voice(build);
 
         }
 
@@ -399,7 +399,7 @@ var polyphony = (function(){
         build.apply(this, [modules]);
 
     }
-    Synth.inherit(Subscriber);
+    Voice.inherit(Subscriber);
 
     function Bank(synth, voices){
 
@@ -448,9 +448,9 @@ var polyphony = (function(){
     /* -------------------------------------------------- */
 
     var containers = {
-        Bank        : Bank,
-        Synth       : Synth,
-        out         : context.destination
+        Bank    : Bank,
+        Voice   : Voice,
+        out     : context.destination
     }
 
     return function(build){
